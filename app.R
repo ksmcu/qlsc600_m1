@@ -141,10 +141,7 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       sliderInput("ts", "ts",value=0.64, min = 0.1, max = 1.0, step=0.01),
-      # sliderInput("te", "te", min = 1.0, max = 2.0, value = 1.5, step=0.1),
-      # sliderInput("theta", "theta",min = 0.1, max = 0.5, value = 0.4, step=0.1),
       sliderInput("k", "k",min = 0, max = 1.0, value = 0.4,step=0.01),
-      # sliderInput("phic", "phic",min = 0.1, max = 0.9, value = 0.5,step=0.1),
       sliderInput("phio", "phio",min = 0.1, max = 1.0, value = 0.2, step=0.01),
       sliderInput("N", "iteration",min = 2, max = 1000, value = 100, step=1)
     ),
@@ -161,7 +158,6 @@ server <- function(input, output, session) {
   )
   output$plot <- renderPlot({
     input$newplot
-    # Add a little noise to the cars data
     p_cobweb(input$ts,1.5,0.4,input$k,0.5,input$phio,input$N)
   })
 }
