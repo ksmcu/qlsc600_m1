@@ -8,7 +8,7 @@ library(plotly)
 library(tidyverse)
 library(dplyr)
 
-##########pprc plot###############################################
+##########phase response curve######################################
 pprc <- function(k,phic) {
   
   phi.values = seq(0, 1, by = 0.001)
@@ -25,7 +25,7 @@ p_cobweb<-function(ts,te,theta,k,phic,phi_o,N)
 {
   par(mfrow=c(2,1))
   
-  ######relationship between phase and timeof sinus beat
+  ######relationship between phase and time of sinus beat
   x <- rep(NA,N)
   x[1] <- phi_o
   for(i in 2:N)
@@ -44,7 +44,7 @@ p_cobweb<-function(ts,te,theta,k,phic,phi_o,N)
     }
   }
   
-  plot(x[1:N],type='l',xlab='t',ylab='phi_i')
+  plot(x[1:N],type='l',xlab='t',ylab='phi')
   
   ######cobweb plot 
   #initial phi_{i}
@@ -72,6 +72,7 @@ p_cobweb<-function(ts,te,theta,k,phic,phi_o,N)
   start=phi_o
   bound=FALSE
   
+  #sinus phase function
   fsinus <- function(start){
     if (0 <= start & start <(ts-theta)/te)
     {
@@ -99,10 +100,8 @@ p_cobweb<-function(ts,te,theta,k,phic,phi_o,N)
     else
     {
       #this point goes to y=x line
-      lines(x=c(start, 
-                fsinus(start)),
-            y=c(fsinus(start),
-                fsinus(start)),
+      lines(x=c(start,fsinus(start)),
+            y=c(fsinus(start),fsinus(start)),
             col='blue')
       bound=TRUE
       start=fsinus(start)
@@ -113,6 +112,7 @@ p_cobweb<-function(ts,te,theta,k,phic,phi_o,N)
 ##############shiny app ########################################################
 ui <- fluidPage(
   tags$head(
+    # to display latex value in shiny app
     tags$link(rel="stylesheet", 
               href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css", 
               integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ",
@@ -142,11 +142,11 @@ ui <- fluidPage(
     sidebarPanel(
       sliderInput("ts", "ts",value=0.64, min = 0.1, max = 1.0, step=0.01),
       sliderInput("k", "k",min = 0, max = 1.0, value = 0.4,step=0.01),
-      sliderInput("phio", "phio",min = 0.1, max = 1.0, value = 0.2, step=0.01),
-      sliderInput("N", "iteration",min = 2, max = 1000, value = 100, step=1)
+      sliderInput("phio", "phi_o",min = 0.1, max = 1, value = 0.2, step=0.01),
+      sliderInput("N", "Iteration",min = 2, max = 1000, value = 100, step=1)
     ),
     mainPanel(
-      plotlyOutput("prcplot"),
+      plotlyOutput("prcplot", height = "250", width = "250"),
       plotOutput("plot")
     )
   )
@@ -157,6 +157,10 @@ server <- function(input, output, session) {
     pprc(input$k,0.5)
   )
   output$plot <- renderPlot({
+    print(input$phio)
+    validate(
+      need(input$phio != 1, "Please select initial condition less than 1")
+    )
     input$newplot
     p_cobweb(input$ts,1.5,0.4,input$k,0.5,input$phio,input$N)
   })
